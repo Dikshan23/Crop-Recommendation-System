@@ -1,0 +1,29 @@
+# Python cache
+__pycache__/
+*.pyc
+
+# Virtual environments
+venv/
+.env/
+
+# Jupyter notebook checkpoints
+.ipynb_checkpoints
+
+# VS Code settings
+.vscode/
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Data files
+*.csv
+*.xlsx
+
+# Large model files
+*.pkl
+*.joblib
+*.h5
+
+# Results/outputs
+results/
