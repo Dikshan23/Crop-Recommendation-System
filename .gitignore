@@ -7,7 +7,7 @@ venv/
 .env/
 
 # Jupyter notebook checkpoints
-.ipynb_checkpoints
+.ipynb_checkpoints/
 
 # VS Code settings
 .vscode/
@@ -26,3 +26,7 @@ Thumbs.db
 *.h5
 
 # Results/outputs
+results/
+
+# Logs
+*.log
