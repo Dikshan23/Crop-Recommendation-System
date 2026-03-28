@@ -2,6 +2,11 @@ import streamlit as st
 import graphviz
 from PIL import Image
 from utils.auth import init_session
+import base64
+
+def encode_image(image_path):
+    with open(image_path, "rb") as image_file:
+        return base64.b64encode(image_file.read()).decode()
 
 # --- PAGE CONFIGURATION ---
 st.set_page_config(page_title="AgroTree - Crop Recommendation System", layout="wide", initial_sidebar_state="collapsed")
@@ -205,30 +210,35 @@ with hw_col2:
 st.markdown("<div class='section-spacing'></div>", unsafe_allow_html=True)
 st.markdown("<h2 style='text-align: center;'>Meet the Developers</h2><br>", unsafe_allow_html=True)
 
+# Encode images to base64
+dk_img = encode_image("images/dk.jpg")
+pathak_img = encode_image("images/pathak.jpg")
+chetan_img = encode_image("images/chetan.jpg")
+
 dev_col1, dev_col2, dev_col3 = st.columns(3)
 
 with dev_col1:
-    st.markdown("""
+    st.markdown(f"""
     <div class="dev-card">
-        <img src="" class="dev-img">
+        <img src="data:image/jpeg;base64,{dk_img}" class="dev-img">
         <div class="dev-name">Dikshan KC</div>
         <div class="roll">79010772</div>
     </div>
     """, unsafe_allow_html=True)
 
 with dev_col2:
-    st.markdown("""
+    st.markdown(f"""
     <div class="dev-card">
-        <img src="" class="dev-img">
+        <img src="data:image/jpeg;base64,{pathak_img}" class="dev-img">
         <div class="dev-name">Prajwal Pathak</div>
         <div class="roll">79010785</div>
     </div>
     """, unsafe_allow_html=True)
 
 with dev_col3:
-    st.markdown("""
+    st.markdown(f"""
     <div class="dev-card">
-        <img src="" class="dev-img">
+        <img src="data:image/jpeg;base64,{chetan_img}" class="dev-img">
         <div class="dev-name">Chetan Bhattarai</div>
         <div class="roll">79010771</div>
     </div>
