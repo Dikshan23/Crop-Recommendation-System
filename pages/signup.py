@@ -1,7 +1,7 @@
 import streamlit as st
 from utils.auth import signup_user, init_session
 # Removed emoji, added collapsed sidebar state
-st.set_page_config(page_title="Sign Up - AgriAI", layout="wide", initial_sidebar_state="collapsed")
+st.set_page_config(page_title="Sign Up - AgroTree", layout="wide", initial_sidebar_state="collapsed")
 
 init_session()
 st.markdown("""
