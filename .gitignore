@@ -20,11 +20,6 @@ Thumbs.db
 *.csv
 *.xlsx
 
-# Large model files
-*.pkl
-*.joblib
-*.h5
-
 # Results/outputs
 results/
 
