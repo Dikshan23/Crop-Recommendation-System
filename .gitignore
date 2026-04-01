@@ -4,15 +4,17 @@ __pycache__/
 
 # Virtual environments
 venv/
+.venv/
 .env/
 
 # Jupyter notebook checkpoints
 .ipynb_checkpoints/
 
-# VS Code settings
+# IDE / VS Code
 .vscode/
+.idea/
 
-# System files
+# System / OS
 .DS_Store
 Thumbs.db
 
@@ -23,5 +25,15 @@ Thumbs.db
 # Results/outputs
 results/
 
-# Logs
+# Logs & Cache
 *.log
+.agrotree_cache/
+*.cache
+
+# Streamlit
+.streamlit/
+
+# Environment variables
+.env
+.env.local
+htmlcov/
