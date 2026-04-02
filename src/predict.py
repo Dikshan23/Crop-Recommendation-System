@@ -1,6 +1,6 @@
 import numpy as np
 
-from utils import load_model
+from src.model_utils import load_model
 
 
 _model = None

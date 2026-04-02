@@ -2,8 +2,17 @@ import pandas as pd
 import joblib
 import json
 import os
+import sys
 
-from config import DATASET_PATH, MODEL_PATH, METRICS_PATH
+# Crucial for loading the pickled model which was saved when 'model.py' 
+# was top-level. We map 'model' to 'src.model' so joblib can find the class.
+try:
+    import src.model as model_pkg
+    sys.modules['model'] = model_pkg
+except ImportError:
+    pass
+
+from src.config import DATASET_PATH, MODEL_PATH, METRICS_PATH
 
 
 def load_dataset():

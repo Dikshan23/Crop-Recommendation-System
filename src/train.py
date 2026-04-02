@@ -1,8 +1,8 @@
 from sklearn.metrics import accuracy_score, classification_report
 
-from utils import load_dataset, save_model, save_metrics
-from preprocess import split_features_labels, train_test_data
-from model import DecisionTreeCART
+from src.model_utils import load_dataset, save_model, save_metrics
+from src.preprocess import split_features_labels, train_test_data
+from src.model import DecisionTreeCART
 
 
 def train():
