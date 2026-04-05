@@ -72,8 +72,6 @@ with tab1:
         # Save to history
         if save_prediction_to_history(user, n, p, k, temp, hum, ph, rain, result):
             st.success("✅ Prediction saved to history!")
-            time.sleep(3)
-            st.rerun()
         else:
             st.warning("⚠️ Prediction made but could not save to history")
 
