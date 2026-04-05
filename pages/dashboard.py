@@ -4,6 +4,7 @@ import os
 from datetime import datetime
 import time
 import pandas as pd
+import pytz
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))) 
 
@@ -114,6 +115,9 @@ with tab2:
         if filtered:
             for idx, pred in enumerate(filtered):
                 date_obj = pd.to_datetime(pred["created_at"])
+                # Convert to Nepal timezone (UTC+5:45)
+                nepal_tz = pytz.timezone('Asia/Kathmandu')
+                date_obj = date_obj.replace(tzinfo=pytz.UTC).astimezone(nepal_tz)
                 date_str = date_obj.strftime("%b %d, %Y")
                 time_str = date_obj.strftime("%H:%M")
                 crop = pred["predicted_crop"].title()
