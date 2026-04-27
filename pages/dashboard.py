@@ -3,6 +3,7 @@ import sys
 import os
 import time
 import pandas as pd
+import pytz
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))) 
 
@@ -87,19 +88,44 @@ with tab1:
 
     # Run when submit is clicked
     if submit:
-        with st.spinner("Analyzing soil and weather conditions..."):
-            time.sleep(1)
-            result = predict_crop(n, p, k, temp, hum, ph, rain)
-        
-        st.success("Prediction Result")
-        st.info(f"The most suitable crop for these conditions is: {result.upper()}")
-        
-        # Save to history
-        if save_prediction_to_history(user, n, p, k, temp, hum, ph, rain, result):
-            st.success("✅ Prediction saved to history!")
-            st.balloons()
+        # Validate form inputs
+        errors = validate_form(n, p, k, temp, hum, ph, rain)
+
+        if errors:
+            # Show all validation errors
+            for err in errors:
+                st.error(err)
+            st.stop()  # Stop execution if validation fails
         else:
-            st.warning("⚠️ Prediction made but could not save to history")
+            # Validation passed - update session and proceed with prediction
+            st.session_state.prev_inputs = current_inputs
+
+            # Show soft warnings for unusual or boundary-near values.
+            warnings = warn_inputs(n, p, k, temp, hum, ph, rain)
+            for warning in warnings:
+                st.warning(f"⚠️ {warning}")
+            
+            with st.spinner("Analyzing soil and weather conditions..."):
+                time.sleep(1)
+                crop, confidence = predict_crop_with_confidence(n, p, k, temp, hum, ph, rain)
+
+            if confidence < 0:
+                confidence = 0.0
+
+            conf_pct = confidence * 100
+
+            # High confidence result
+            if confidence >= CONFIDENCE_THRESHOLD:
+                st.success(f"✅ The most suitable crop is: **{crop.upper()}**")
+                st.write("")
+                st.progress(confidence, text=f"Confidence: {conf_pct:.1f}%")
+
+                if save_prediction_to_history(user, n, p, k, temp, hum, ph, rain, crop, confidence):
+                    st.session_state.prediction_count += 1
+                    st.success("✅ Prediction saved to history!")
+                    st.balloons()
+                else:
+                    st.warning("⚠️ Prediction made but could not save to history")
 
             # Low confidence result
             else:
