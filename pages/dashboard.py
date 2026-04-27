@@ -25,7 +25,7 @@ BOUNDARIES = {
     'rainfall': (20, 300)
 }
 
-CONFIDENCE_THRESHOLD = 0.80
+CONFIDENCE_THRESHOLD = 0.70
 
 # Validation function
 def validate_form(n, p, k, temp, hum, ph, rain):
