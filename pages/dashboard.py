@@ -60,7 +60,7 @@ if "prev_inputs" not in st.session_state:
     st.session_state.prev_inputs = None
 
 # Create tabs
-tab1, tab2 = st.tabs(["Make Prediction", f"History ({st.session_state.prediction_count})"])
+tab1, tab2 = st.tabs(["Make Prediction", f"History"])
 
 # Tab 1: Prediction form
 with tab1:
