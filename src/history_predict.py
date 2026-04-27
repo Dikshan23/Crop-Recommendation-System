@@ -9,7 +9,7 @@ from utils.supabase_client import supabase
 from utils.auth import get_user_email
 
 
-def save_prediction_to_history(user, n, p, k, temp, hum, ph, rain, predicted_crop):
+def save_prediction_to_history(user, n, p, k, temp, hum, ph, rain, predicted_crop, confidence=None):
     """
     Save a crop prediction to Supabase history table.
     
@@ -23,6 +23,7 @@ def save_prediction_to_history(user, n, p, k, temp, hum, ph, rain, predicted_cro
         ph: pH value
         rain: Rainfall value
         predicted_crop: The predicted crop name
+        confidence: Confidence score (0.0 - 1.0), optional
     
     Returns:
         bool: True if saved successfully, False otherwise
@@ -45,6 +46,7 @@ def save_prediction_to_history(user, n, p, k, temp, hum, ph, rain, predicted_cro
             "ph": float(ph),
             "rainfall": float(rain),
             "predicted_crop": str(predicted_crop).lower(),
+            "confidence": float(confidence) if confidence is not None else None,
             "created_at": datetime.utcnow().isoformat()
         }
         

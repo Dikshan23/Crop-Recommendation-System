@@ -8,7 +8,7 @@ import pytz
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))) 
 
 from utils.auth import require_auth, logout_user, init_session, get_user_email
-from src.predict import predict_crop_with_confidence
+from src.predict import predict_crop
 from src.validations import validate_inputs, warn_inputs
 from src.history_predict import save_prediction_to_history, get_user_prediction_history, get_prediction_count, delete_prediction
 
@@ -107,7 +107,7 @@ with tab1:
             
             with st.spinner("Analyzing soil and weather conditions..."):
                 time.sleep(1)
-                crop, confidence = predict_crop_with_confidence(n, p, k, temp, hum, ph, rain)
+                crop, confidence, _ = predict_crop(n, p, k, temp, hum, ph, rain)
 
             if confidence < 0:
                 confidence = 0.0
