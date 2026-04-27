@@ -1,89 +1,24 @@
 import streamlit as st
+import keyring
 from utils.supabase_client import supabase
-import json
-from pathlib import Path
 
-# Session cache file for persistence across server restarts
-CACHE_DIR = Path.home() / ".agrotree_cache"
-CACHE_DIR.mkdir(exist_ok=True)
-SESSION_CACHE_FILE = CACHE_DIR / "session_cache.json"
+# Config
+SERVICE_NAME = "agrotree_supabase"
+REFRESH_KEY = "refresh_token"
 
+# Save token securely
+def _save_refresh_token(token: str):
+    keyring.set_password(SERVICE_NAME, REFRESH_KEY, token)
 
-# -------------------------------
-# Get user email safely
-# -------------------------------
-def get_user_email(user):
-    """Safely extract email from Supabase user object"""
+# Load token
+def _load_refresh_token():
+    return keyring.get_password(SERVICE_NAME, REFRESH_KEY)
 
-    if user is None:
-        return None
+# Delete token
+def _clear_refresh_token():
+    keyring.delete_password(SERVICE_NAME, REFRESH_KEY)
 
-    # Direct email field
-    if hasattr(user, "email") and user.email:
-        return user.email
-
-    # Sometimes stored inside metadata
-    if hasattr(user, "user_metadata") and isinstance(user.user_metadata, dict):
-        email = user.user_metadata.get("email")
-        if email:
-            return email
-
-    return "User"
-
-
-# -------------------------------
-# Save session cache
-# -------------------------------
-def _save_session_cache(session_data):
-    """Save refresh/access token to cache"""
-
-    try:
-        cache_data = {
-            "refresh_token": session_data.get("refresh_token"),
-            "access_token": session_data.get("access_token")
-        }
-
-        with open(SESSION_CACHE_FILE, "w") as f:
-            json.dump(cache_data, f)
-
-    except Exception as e:
-        print("Cache save error:", e)
-
-
-# -------------------------------
-# Load session cache
-# -------------------------------
-def _load_session_cache():
-    """Load session from cache"""
-
-    try:
-        if SESSION_CACHE_FILE.exists():
-            with open(SESSION_CACHE_FILE, "r") as f:
-                return json.load(f)
-
-    except Exception as e:
-        print("Cache load error:", e)
-
-    return None
-
-
-# -------------------------------
-# Clear session cache
-# -------------------------------
-def _clear_session_cache():
-    """Remove cached session"""
-
-    try:
-        if SESSION_CACHE_FILE.exists():
-            SESSION_CACHE_FILE.unlink()
-
-    except Exception as e:
-        print("Cache clear error:", e)
-
-
-# -------------------------------
 # Initialize session
-# -------------------------------
 def init_session():
 
     if "user" not in st.session_state:
@@ -92,17 +27,15 @@ def init_session():
     if "session" not in st.session_state:
         st.session_state["session"] = None
 
-    # If user already set, skip
+    # Already logged in in current runtime
     if st.session_state["user"]:
         return
 
-    # Try to recover active session
+    # Try Supabase session first (if still alive in memory)
     try:
-
         session_res = supabase.auth.get_session()
 
         if session_res and session_res.session:
-
             user_res = supabase.auth.get_user()
 
             if user_res and user_res.user:
@@ -110,43 +43,32 @@ def init_session():
                 st.session_state["session"] = session_res.session
                 return
 
-    except Exception as e:
-        print("Current session error:", e)
+    except Exception:
+        pass
 
-    # Try refresh token from cache
+    # Fallback: restore from secure OS storage
     try:
+        refresh_token = _load_refresh_token()
 
-        cached = _load_session_cache()
+        if refresh_token:
 
-        if cached and cached.get("refresh_token"):
+            session_res = supabase.auth.refresh_session(refresh_token)
 
-            session_res = supabase.auth.refresh_session(
-                cached["refresh_token"]
-            )
-
-            if session_res and session_res.user:
+            if session_res and session_res.session:
 
                 st.session_state["user"] = session_res.user
                 st.session_state["session"] = session_res.session
 
-                # Update tokens
-                _save_session_cache({
-                    "refresh_token": session_res.session.refresh_token,
-                    "access_token": session_res.session.access_token
-                })
+                # update stored token (rotation)
+                _save_refresh_token(session_res.session.refresh_token)
 
-    except Exception as e:
-        print("Session refresh error:", e)
-        _clear_session_cache()
+    except Exception:
+        _clear_refresh_token()
 
-
-# -------------------------------
-# LOGIN
-# -------------------------------
+# Login user
 def login_user(email, password):
 
     try:
-
         res = supabase.auth.sign_in_with_password({
             "email": email,
             "password": password
@@ -155,59 +77,55 @@ def login_user(email, password):
         st.session_state["user"] = res.user
         st.session_state["session"] = res.session
 
-        # Save tokens
-        _save_session_cache({
-            "refresh_token": res.session.refresh_token,
-            "access_token": res.session.access_token
-        })
+        # store refresh token securely
+        _save_refresh_token(res.session.refresh_token)
 
         return True
 
-    except Exception as e:
-        print("Login error:", e)
+    except Exception:
+        st.error("Login failed")
         return False
 
-
-# -------------------------------
-# SIGN UP
-# -------------------------------
+# Sign up user
 def signup_user(email, password):
 
     try:
-
         supabase.auth.sign_up({
             "email": email,
             "password": password
         })
-
         return True
 
-    except Exception as e:
-        print("Signup error:", e)
+    except Exception:
+        st.error("Signup failed")
         return False
 
-
-# -------------------------------
-# LOGOUT
-# -------------------------------
+# Logout user
 def logout_user():
 
     try:
         supabase.auth.sign_out()
+    except Exception:
+        pass
 
-    except Exception as e:
-        print("Logout error:", e)
+    st.session_state.clear()
 
-    st.session_state["user"] = None
-    st.session_state["session"] = None
+    try:
+        _clear_refresh_token()
+    except Exception:
+        pass
 
-    _clear_session_cache()
+    st.rerun()
 
-
-# -------------------------------
-# Protect Page
-# -------------------------------
+# Require authentication
 def require_auth():
 
     if not st.session_state.get("user"):
         st.switch_page("pages/login.py")
+
+# Get user email
+def get_user_email(user):
+    """Extract email from user object"""
+    if user and hasattr(user, 'email'):
+        return user.email
+    return None

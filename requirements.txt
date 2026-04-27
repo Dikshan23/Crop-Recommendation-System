@@ -1,4 +1,3 @@
-
 numpy
 matplotlib
 seaborn
@@ -11,3 +10,5 @@ graphviz
 Pillow
 pandas
 supabase
+pytz
+keyring
