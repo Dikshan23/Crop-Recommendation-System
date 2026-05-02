@@ -107,16 +107,17 @@ with tab1:
 
     # --- Handle submission ---
     if submit:
-        warnings_list = warn_inputs(n, p, k, temp, hum, ph, rain)
-        if warnings_list:
-            st.markdown("#### ⚠️ Heads up:")
-            for w in warnings_list:
-                st.warning(w)
-
         try:
             with st.spinner("Analyzing soil and weather conditions..."):
                 time.sleep(1)
                 crop, confidence, proba = predict_crop(n, p, k, temp, hum, ph, rain)
+
+            # Only show warnings if prediction succeeded (inputs are valid)
+            warnings_list = warn_inputs(n, p, k, temp, hum, ph, rain)
+            if warnings_list:
+                st.markdown("#### ⚠️ Heads up:")
+                for w in warnings_list:
+                    st.warning(w)
 
             st.success("✅ Prediction Complete")
             st.info(f"🌾 The most suitable crop for these conditions is: **{crop.upper()}**")
@@ -128,6 +129,7 @@ with tab1:
                 st.warning("⚠️ Prediction made but could not save to history.")
 
         except ValueError as e:
+            # Only hard validation errors reach here — no warnings shown
             error_lines = str(e).replace("Invalid input values:\n", "").split("\n")
             st.markdown("#### ❌ Please fix the following errors:")
             for line in error_lines:
