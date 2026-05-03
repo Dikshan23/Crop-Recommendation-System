@@ -7,7 +7,7 @@ import pandas as pd
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from utils.auth import require_auth, logout_user, init_session, get_user_email
-from src.predict import predict_crop
+from src.predict import predict_crop, adjusted_confidence
 from src.validations import warn_inputs
 from src.history_predict import (
     save_prediction_to_history,
@@ -112,8 +112,13 @@ with tab1:
                 time.sleep(1)
                 crop, confidence, proba = predict_crop(n, p, k, temp, hum, ph, rain)
 
-            # Show warnings if inputs are near boundaries or agronomically unusual
+            # Get warnings
             warnings_list = warn_inputs(n, p, k, temp, hum, ph, rain)
+
+            # Adjust confidence based on warnings and leaf reliability
+            display_confidence = adjusted_confidence(confidence, warnings_list, proba)
+
+            # Show warnings
             if warnings_list:
                 st.markdown("#### ⚠️ Heads up:")
                 for w in warnings_list:
@@ -121,14 +126,24 @@ with tab1:
 
             st.success("✅ Prediction Complete")
 
-            if confidence < 1.0:
-                top = sorted(proba.items(), key=lambda x: x[1], reverse=True)[:2]
-                st.info(f"🌾 Primary recommendation: **{top[0][0].upper()}** ({top[0][1]*100:.0f}% confidence)")
-                if len(top) > 1 and top[1][1] > 0:
-                    st.warning(f"Also consider: **{top[1][0].upper()}** ({top[1][1]*100:.0f}% confidence) — conditions overlap between these crops")
+            # Sort proba for top-2 check
+            top = sorted(proba.items(), key=lambda x: x[1], reverse=True)[:2]
+            second_exists = len(top) > 1 and top[1][1] > 0
+
+            if second_exists:
+                # always show top-2 when a second crop exists
+                st.info(f"🌾 Primary recommendation: **{top[0][0].upper()}** ({display_confidence*100:.0f}% confidence)")
+                st.warning(f"Also consider: **{top[1][0].upper()}** ({top[1][1]*100:.0f}% confidence) — conditions overlap or input values are unusual")
+
+            elif display_confidence < confidence:
+                # single prediction but confidence reduced due to warnings
+                st.info(f"🌾 Suggested crop: **{crop.upper()}**")
+                st.caption(f"Adjusted confidence: {display_confidence*100:.0f}% — reduced due to unusual input values. Treat as a suggestion only.")
+
             else:
+                # clean input, full confidence — normal prediction
                 st.info(f"🌾 The most suitable crop for these conditions is: **{crop.upper()}**")
-                st.caption(f"Model confidence: {confidence * 100:.1f}%")
+                st.caption(f"Model confidence: {display_confidence * 100:.1f}%")
 
             if save_prediction_to_history(user, n, p, k, temp, hum, ph, rain, crop):
                 st.success("✅ Prediction saved to history!")
