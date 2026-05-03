@@ -5,9 +5,9 @@ Single source of truth for valid ranges — used by both backend and UI.
 
 # Valid ranges for each input feature
 VALID_RANGES = {
-    "nitrogen":    {"min": 0,    "max": 140,  "unit": "mg/kg", "label": "Nitrogen (N)"},
-    "phosphorus":  {"min": 5,    "max": 145,  "unit": "mg/kg", "label": "Phosphorus (P)"},
-    "potassium":   {"min": 5,    "max": 205,  "unit": "mg/kg", "label": "Potassium (K)"},
+    "nitrogen":    {"min": 10,   "max": 140,  "unit": "mg/kg", "label": "Nitrogen (N)"},
+    "phosphorus":  {"min": 10,   "max": 145,  "unit": "mg/kg", "label": "Phosphorus (P)"},
+    "potassium":   {"min": 10,   "max": 205,  "unit": "mg/kg", "label": "Potassium (K)"},
     "temperature": {"min": 8.0,  "max": 44.0, "unit": "°C",    "label": "Temperature"},
     "humidity":    {"min": 14.0, "max": 100.0,"unit": "%",     "label": "Humidity"},
     "ph":          {"min": 3.5,  "max": 9.5,  "unit": "",      "label": "Soil pH"},
@@ -19,9 +19,9 @@ BOUNDARY_MARGIN = 0.08  # 8% of total range
 
 # Agronomically unusual ranges — values technically valid but rarely seen in good predictions
 UNUSUAL_RANGES = {
-    "nitrogen":    {"warn_below": 10,   "warn_above": 120},
-    "phosphorus":  {"warn_below": 10,   "warn_above": 130},
-    "potassium":   {"warn_below": 10,   "warn_above": 190},
+    "nitrogen":    {"warn_below": 15,   "warn_above": 120},
+    "phosphorus":  {"warn_below": 15,   "warn_above": 130},
+    "potassium":   {"warn_below": 15,   "warn_above": 190},
     "temperature": {"warn_below": 10.0, "warn_above": 42.0},
     "humidity":    {"warn_below": 20.0, "warn_above": 98.0},
     "ph":          {"warn_below": 4.5,  "warn_above": 8.5},

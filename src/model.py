@@ -13,7 +13,7 @@ class Node:
 
 
 class DecisionTreeCART:
-    def __init__(self, max_depth=10, min_samples_split=5, min_samples_leaf=2):
+    def __init__(self, max_depth=15, min_samples_split=5, min_samples_leaf=2):
         self.max_depth = max_depth
         self.min_samples_split = min_samples_split
         self.min_samples_leaf = min_samples_leaf

@@ -57,19 +57,19 @@ with tab1:
         with col1:
             st.markdown("##### 🌱 Soil Nutrients")
             n = st.number_input(
-                "Nitrogen (N)  •  0 – 140 mg/kg",
+                "Nitrogen (N)  •  10 – 140 mg/kg",
                 value=50.0,
-                help="Valid range: 0 to 140 mg/kg"
+                help="Valid range: 10 to 140 mg/kg"
             )
             p = st.number_input(
-                "Phosphorus (P)  •  5 – 145 mg/kg",
+                "Phosphorus (P)  •  10 – 145 mg/kg",
                 value=50.0,
-                help="Valid range: 5 to 145 mg/kg"
+                help="Valid range: 10 to 145 mg/kg"
             )
             k = st.number_input(
-                "Potassium (K)  •  5 – 205 mg/kg",
+                "Potassium (K)  •  10 – 205 mg/kg",
                 value=50.0,
-                help="Valid range: 5 to 205 mg/kg"
+                help="Valid range: 10 to 205 mg/kg"
             )
 
         with col2:
@@ -112,7 +112,7 @@ with tab1:
                 time.sleep(1)
                 crop, confidence, proba = predict_crop(n, p, k, temp, hum, ph, rain)
 
-            # Only show warnings if prediction succeeded (inputs are valid)
+            # Show warnings if inputs are near boundaries or agronomically unusual
             warnings_list = warn_inputs(n, p, k, temp, hum, ph, rain)
             if warnings_list:
                 st.markdown("#### ⚠️ Heads up:")
@@ -120,8 +120,15 @@ with tab1:
                     st.warning(w)
 
             st.success("✅ Prediction Complete")
-            st.info(f"🌾 The most suitable crop for these conditions is: **{crop.upper()}**")
-            st.caption(f"Model confidence: {confidence * 100:.1f}%")
+
+            if confidence < 1.0:
+                top = sorted(proba.items(), key=lambda x: x[1], reverse=True)[:2]
+                st.info(f"🌾 Primary recommendation: **{top[0][0].upper()}** ({top[0][1]*100:.0f}% confidence)")
+                if len(top) > 1 and top[1][1] > 0:
+                    st.warning(f"Also consider: **{top[1][0].upper()}** ({top[1][1]*100:.0f}% confidence) — conditions overlap between these crops")
+            else:
+                st.info(f"🌾 The most suitable crop for these conditions is: **{crop.upper()}**")
+                st.caption(f"Model confidence: {confidence * 100:.1f}%")
 
             if save_prediction_to_history(user, n, p, k, temp, hum, ph, rain, crop):
                 st.success("✅ Prediction saved to history!")
@@ -129,7 +136,7 @@ with tab1:
                 st.warning("⚠️ Prediction made but could not save to history.")
 
         except ValueError as e:
-            # Only hard validation errors reach here — no warnings shown
+            # Hard validation errors — prediction blocked
             error_lines = str(e).replace("Invalid input values:\n", "").split("\n")
             st.markdown("#### ❌ Please fix the following errors:")
             for line in error_lines:
