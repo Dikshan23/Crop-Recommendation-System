@@ -1,143 +1,90 @@
 import numpy as np
 
-class Node:
-    def __init__(self, feature=None, threshold=None,
-                 left=None, right=None, value=None, class_distribution=None):
-        self.feature = feature
-        self.threshold = threshold
-        self.left = left
-        self.right = right
-        self.value = value
-        # Stores {class: count} at leaf nodes for confidence estimation
-        self.class_distribution = class_distribution or {}
+from src.model_utils import load_model
+from src.validations import validate_inputs
 
 
-class DecisionTreeCART:
-    def __init__(self, max_depth=15, min_samples_split=5, min_samples_leaf=2):
-        self.max_depth = max_depth
-        self.min_samples_split = min_samples_split
-        self.min_samples_leaf = min_samples_leaf
-        self.root = None
+_model = None
 
-    def gini(self, y):
-        """Calculate Gini impurity for a set of labels."""
-        classes = np.unique(y)
-        impurity = 1.0
-        for c in classes:
-            p = np.sum(y == c) / len(y)
-            impurity -= p ** 2
-        return impurity
 
-    def split(self, X, y, feature, threshold):
-        """Split dataset based on feature and threshold."""
-        left_idx = X[:, feature] <= threshold
-        right_idx = X[:, feature] > threshold
-        return X[left_idx], X[right_idx], y[left_idx], y[right_idx]
+def _get_model():
+    global _model
+    if _model is None:
+        _model = load_model()
+    return _model
 
-    def best_split(self, X, y):
-        """Find the best feature and threshold to split on."""
-        best_feature = None
-        best_threshold = None
-        best_gini = float("inf")
-        n_features = X.shape[1]
 
-        for feature in range(n_features):
-            thresholds = np.unique(X[:, feature])
-            for threshold in thresholds:
-                X_left, X_right, y_left, y_right = self.split(X, y, feature, threshold)
+def adjusted_confidence(confidence, warnings_list, proba):
+    """
+    Adjust model confidence based on:
+    1. Warning penalty  — each warning reduces confidence by 10%
+    2. Leaf size penalty — small leaf = less reliable prediction
 
-                if len(y_left) == 0 or len(y_right) == 0:
-                    continue
-                if len(y_left) < self.min_samples_leaf or len(y_right) < self.min_samples_leaf:
-                    continue
+    Args:
+        confidence   (float): Raw model confidence from leaf node
+        warnings_list (list): Warnings from warn_inputs()
+        proba         (dict): Full class probability distribution
 
-                gini_left = self.gini(y_left)
-                gini_right = self.gini(y_right)
-                weighted_gini = (len(y_left) / len(y) * gini_left +
-                                 len(y_right) / len(y) * gini_right)
+    Returns:
+        float: Adjusted confidence score (floored at 0.50)
+    """
+    # 1. Warning penalty — 10% per warning, max 40% total
+    warning_penalty = min(len(warnings_list) * 0.10, 0.40)
 
-                if weighted_gini < best_gini:
-                    best_gini = weighted_gini
-                    best_feature = feature
-                    best_threshold = threshold
+    # 2. Leaf size penalty — based on total samples in the leaf
+    total_samples = sum(proba.values()) if all(
+        isinstance(v, (int, float)) for v in proba.values()
+    ) else None
 
-        return best_feature, best_threshold
+    # proba values are probabilities (0-1), not raw counts
+    # use spread of distribution as proxy for leaf reliability
+    probs = list(proba.values())
+    max_prob = max(probs)
+    second_prob = sorted(probs, reverse=True)[1] if len(probs) > 1 else 0
 
-    def majority_class(self, y):
-        """Return the most common class in y."""
-        values, counts = np.unique(y, return_counts=True)
-        return values[np.argmax(counts)]
+    leaf_size_penalty = 0.0
+    if max_prob - second_prob < 0.2:
+        leaf_size_penalty = 0.20  # very mixed leaf
+    elif max_prob - second_prob < 0.4:
+        leaf_size_penalty = 0.10  # somewhat mixed leaf
 
-    def class_distribution(self, y):
-        """Return class probability distribution at a leaf."""
-        total = len(y)
-        values, counts = np.unique(y, return_counts=True)
-        return {str(v): int(c) for v, c in zip(values, counts)}
+    # combine penalties, floor at 0.50
+    adjusted = confidence - warning_penalty - leaf_size_penalty
+    return round(max(adjusted, 0.50), 4)
 
-    def build_tree(self, X, y, depth=0):
-        """Recursively build the decision tree."""
-        num_samples = len(y)
-        num_classes = len(np.unique(y))
 
-        if (depth >= self.max_depth or
-                num_classes == 1 or
-                num_samples < self.min_samples_split):
-            return Node(
-                value=self.majority_class(y),
-                class_distribution=self.class_distribution(y)
-            )
+def predict_crop(N, P, K, temperature, humidity, ph, rainfall):
+    """
+    Predict the most suitable crop and return confidence score.
 
-        feature, threshold = self.best_split(X, y)
+    Parameters:
+        N           (float): Nitrogen content in soil
+        P           (float): Phosphorus content in soil
+        K           (float): Potassium content in soil
+        temperature (float): Temperature in Celsius
+        humidity    (float): Relative humidity (%)
+        ph          (float): Soil pH value
+        rainfall    (float): Rainfall in mm
 
-        if feature is None:
-            return Node(
-                value=self.majority_class(y),
-                class_distribution=self.class_distribution(y)
-            )
+    Returns:
+        tuple:
+            crop        (str):   Predicted crop name e.g. 'rice'
+            confidence  (float): Confidence score 0.0 – 1.0
+            proba       (dict):  Full class probability distribution
 
-        X_left, X_right, y_left, y_right = self.split(X, y, feature, threshold)
-        left_child = self.build_tree(X_left, y_left, depth + 1)
-        right_child = self.build_tree(X_right, y_right, depth + 1)
+    Raises:
+        ValueError: If any input is outside the valid range
+    """
+    errors = validate_inputs(N, P, K, temperature, humidity, ph, rainfall)
+    if errors:
+        raise ValueError("Invalid input values:\n" + "\n".join(f"• {e}" for e in errors))
 
-        return Node(feature, threshold, left_child, right_child)
+    model    = _get_model()
+    features = np.array([[N, P, K, temperature, humidity, ph, rainfall]])
 
-    def fit(self, X, y):
-        """Train the decision tree."""
-        self.root = self.build_tree(X, y)
+    crop  = model.predict(features)[0]
+    proba = model.predict_proba(features)[0]  # dict of {class: probability}
 
-    def predict_sample(self, node, sample):
-        """Predict class for a single sample."""
-        if node.value is not None:
-            return node.value
-        if sample[node.feature] <= node.threshold:
-            return self.predict_sample(node.left, sample)
-        else:
-            return self.predict_sample(node.right, sample)
+    confidence = proba.get(str(crop), proba.get(crop, 0.0))
 
-    def predict_proba_sample(self, node, sample):
-        """
-        Return class probability distribution for a single sample
-        based on the leaf node's training class distribution.
-        """
-        if node.value is not None:
-            dist = node.class_distribution
-            total = sum(dist.values())
-            if total == 0:
-                return {node.value: 1.0}
-            return {cls: count / total for cls, count in dist.items()}
-
-        if sample[node.feature] <= node.threshold:
-            return self.predict_proba_sample(node.left, sample)
-        else:
-            return self.predict_proba_sample(node.right, sample)
-
-    def predict(self, X):
-        """Predict class labels for multiple samples."""
-        return np.array([self.predict_sample(self.root, sample) for sample in X])
-
-    def predict_proba(self, X):
-        """
-        Return list of dicts — one per sample — with class probabilities.
-        e.g. [{"rice": 0.85, "maize": 0.10, "wheat": 0.05}, ...]
-        """
-        return [self.predict_proba_sample(self.root, sample) for sample in X]
+    return crop, confidence, proba
