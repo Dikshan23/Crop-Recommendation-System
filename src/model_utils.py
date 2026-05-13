@@ -4,7 +4,7 @@ import json
 import os
 import sys
 
-# Crucial for loading the pickled model which was saved when 'model.py' 
+# Crucial for loading the pickled model which was saved when 'model.py'
 # was top-level. We map 'model' to 'src.model' so joblib can find the class.
 try:
     import src.model as model_pkg
@@ -12,16 +12,48 @@ try:
 except ImportError:
     pass
 
-from src.config import DATASET_PATH, MODEL_PATH, METRICS_PATH
+from src.config import (
+    DATASET_PATH,
+    PROCESSED_DATASET_PATH,
+    MODEL_PATH,
+    SCALER_PATH,
+    METRICS_PATH,
+    MEDIANS_PATH,
+    FENCES_PATH,
+)
 
+
+# ── Dataset ───────────────────────────────────────────────────────────────────
 
 def load_dataset():
+    """
+    Loads the dataset for training.
+
+    Priority:
+        1. Processed dataset (Processed_data.csv)
+           — used if it already exists from a previous preprocessing run.
+        2. Raw dataset (data.csv)
+           — used on first run; preprocess.py will clean and save it.
+
+    Returns:
+        df (DataFrame): Loaded dataset
+    """
+    if os.path.exists(PROCESSED_DATASET_PATH):
+        print(f"Processed dataset found. Loading from: {PROCESSED_DATASET_PATH}")
+        df = pd.read_csv(PROCESSED_DATASET_PATH)
+        print(f"Dataset loaded: {df.shape[0]} rows, {df.shape[1]} columns")
+        return df
+
     if not os.path.exists(DATASET_PATH):
         raise FileNotFoundError(f"Dataset not found at: {DATASET_PATH}")
+
+    print(f"Loading raw dataset from: {DATASET_PATH}")
     df = pd.read_csv(DATASET_PATH)
     print(f"Dataset loaded: {df.shape[0]} rows, {df.shape[1]} columns")
     return df
 
+
+# ── Model ─────────────────────────────────────────────────────────────────────
 
 def save_model(model):
     os.makedirs(os.path.dirname(MODEL_PATH), exist_ok=True)
@@ -36,6 +68,56 @@ def load_model():
     print(f"Model loaded from: {MODEL_PATH}")
     return model
 
+
+# ── Scaler ────────────────────────────────────────────────────────────────────
+
+def save_scaler(scaler):
+    os.makedirs(os.path.dirname(SCALER_PATH), exist_ok=True)
+    joblib.dump(scaler, SCALER_PATH)
+    print(f"Scaler saved to: {SCALER_PATH}")
+
+
+def load_scaler():
+    if not os.path.exists(SCALER_PATH):
+        raise FileNotFoundError(f"Scaler not found at: {SCALER_PATH}")
+    scaler = joblib.load(SCALER_PATH)
+    print(f"Scaler loaded from: {SCALER_PATH}")
+    return scaler
+
+
+# ── Medians ───────────────────────────────────────────────────────────────────
+
+def save_medians(medians):
+    os.makedirs(os.path.dirname(MEDIANS_PATH), exist_ok=True)
+    joblib.dump(medians, MEDIANS_PATH)
+    print(f"Medians saved to: {MEDIANS_PATH}")
+
+
+def load_medians():
+    if not os.path.exists(MEDIANS_PATH):
+        raise FileNotFoundError(f"Medians not found at: {MEDIANS_PATH}")
+    medians = joblib.load(MEDIANS_PATH)
+    print(f"Medians loaded from: {MEDIANS_PATH}")
+    return medians
+
+
+# ── IQR Fences ────────────────────────────────────────────────────────────────
+
+def save_fences(fences):
+    os.makedirs(os.path.dirname(FENCES_PATH), exist_ok=True)
+    joblib.dump(fences, FENCES_PATH)
+    print(f"Fences saved to: {FENCES_PATH}")
+
+
+def load_fences():
+    if not os.path.exists(FENCES_PATH):
+        raise FileNotFoundError(f"Fences not found at: {FENCES_PATH}")
+    fences = joblib.load(FENCES_PATH)
+    print(f"Fences loaded from: {FENCES_PATH}")
+    return fences
+
+
+# ── Metrics ───────────────────────────────────────────────────────────────────
 
 def save_metrics(metrics):
     os.makedirs(os.path.dirname(METRICS_PATH), exist_ok=True)

@@ -7,7 +7,7 @@ import pandas as pd
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from utils.auth import require_auth, logout_user, init_session, get_user_email
-from src.predict import predict_crop, adjusted_confidence
+from src.predict import predict_crop          # only predict_crop, no adjusted_confidence
 from src.validations import warn_inputs
 from src.history_predict import (
     save_prediction_to_history,
@@ -110,13 +110,12 @@ with tab1:
         try:
             with st.spinner("Analyzing soil and weather conditions..."):
                 time.sleep(1)
+                # predict_crop returns (crop, confidence, proba)
+                # confidence is already calibrated (Platt scaling) and penalized
                 crop, confidence, proba = predict_crop(n, p, k, temp, hum, ph, rain)
 
-            # Get warnings
+            # Get warnings (for display only, does not affect confidence)
             warnings_list = warn_inputs(n, p, k, temp, hum, ph, rain)
-
-            # Adjust confidence based on warnings and leaf reliability
-            display_confidence = adjusted_confidence(confidence, warnings_list, proba)
 
             # Show warnings
             if warnings_list:
@@ -126,25 +125,29 @@ with tab1:
 
             st.success("✅ Prediction Complete")
 
-            # Sort proba for top-2 check
+            # Sort proba for top-2 check (using raw probabilities, not calibrated confidence)
             top = sorted(proba.items(), key=lambda x: x[1], reverse=True)[:2]
-            second_exists = len(top) > 1 and top[1][1] > 0
+
+            # Show double prediction when the runner-up is genuinely competitive:
+            #   - runner-up raw probability > 30% (not just noise)
+            #   - gap between 1st and 2nd < 35% (not a dominant single prediction)
+            second_exists = (
+                len(top) > 1
+                and top[1][1] > 0.30
+                and (top[0][1] - top[1][1]) < 0.35
+            )
 
             if second_exists:
-                # always show top-2 when a second crop exists
-                st.info(f"🌾 Primary recommendation: **{top[0][0].upper()}** ({display_confidence*100:.0f}% confidence)")
-                st.warning(f"Also consider: **{top[1][0].upper()}** ({top[1][1]*100:.0f}% confidence) — conditions overlap or input values are unusual")
-
-            elif display_confidence < confidence:
-                # single prediction but confidence reduced due to warnings
-                st.info(f"🌾 Suggested crop: **{crop.upper()}**")
-                st.caption(f"Adjusted confidence: {display_confidence*100:.0f}% — reduced due to unusual input values. Treat as a suggestion only.")
+                # Genuinely ambiguous — surface both crops
+                st.info(f"🌾 Primary recommendation: **{top[0][0].upper()}** ({confidence*100:.0f}% confidence)")
+                st.warning(f"Also consider: **{top[1][0].upper()}** ({top[1][1]*100:.0f}% probability) — conditions overlap or input values are unusual")
 
             else:
-                # clean input, full confidence — normal prediction
+                # Single prediction – display final calibrated confidence
                 st.info(f"🌾 The most suitable crop for these conditions is: **{crop.upper()}**")
-                st.caption(f"Model confidence: {display_confidence * 100:.1f}%")
+                st.caption(f"Confidence: {confidence * 100:.1f}%")
 
+            # Save to history
             if save_prediction_to_history(user, n, p, k, temp, hum, ph, rain, crop):
                 st.success("✅ Prediction saved to history!")
             else:
@@ -158,7 +161,7 @@ with tab1:
                 st.error(line.replace("• ", ""))
 
 # -----------------------------------------------------------
-# TAB 2: PREDICTION HISTORY
+# TAB 2: PREDICTION HISTORY (unchanged)
 # -----------------------------------------------------------
 with tab2:
     history = get_user_prediction_history(user)
