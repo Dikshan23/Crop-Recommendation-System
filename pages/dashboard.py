@@ -57,9 +57,9 @@ with tab1:
         with col1:
             st.markdown("##### 🌱 Soil Nutrients")
             n = st.number_input(
-                "Nitrogen (N)  •  10 – 140 mg/kg",
+                "Nitrogen (N)  •  1 – 155 mg/kg",
                 value=50.0,
-                help="Valid range: 10 to 140 mg/kg"
+                help="Valid range: 1 to 155 mg/kg"
             )
             p = st.number_input(
                 "Phosphorus (P)  •  10 – 145 mg/kg",
@@ -67,17 +67,17 @@ with tab1:
                 help="Valid range: 10 to 145 mg/kg"
             )
             k = st.number_input(
-                "Potassium (K)  •  10 – 205 mg/kg",
+                "Potassium (K)  •  10 – 240 mg/kg",
                 value=50.0,
-                help="Valid range: 10 to 205 mg/kg"
+                help="Valid range: 10 to 240 mg/kg"
             )
 
         with col2:
             st.markdown("##### 🌤️ Climate Conditions")
             temp = st.number_input(
-                "Temperature  •  8 – 44 °C",
+                "Temperature  •  8 – 45 °C",
                 value=25.0,
-                help="Valid range: 8 to 44 °C"
+                help="Valid range: 8 to 45 °C"
             )
             hum = st.number_input(
                 "Humidity  •  14 – 100 %",
@@ -93,9 +93,9 @@ with tab1:
                 help="Valid range: 3.5 to 9.5"
             )
             rain = st.number_input(
-                "Rainfall  •  20 – 300 mm",
+                "Rainfall  •  20 – 850 mm",
                 value=100.0,
-                help="Valid range: 20 to 300 mm"
+                help="Valid range: 20 to 850 mm"
             )
 
         st.markdown("")
