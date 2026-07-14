@@ -5,6 +5,7 @@ From-scratch stratified k-fold cross-validation utilities.
 """
 import numpy as np
 from collections import defaultdict
+from src.logger import logger
 
 
 def stratified_kfold(X, y, n_splits=5, random_state=42):
@@ -104,7 +105,7 @@ def cross_validate(model_class, X, y, param_grid, n_splits=5, random_state=42):
             'fold_scores': fold_scores
         })
         
-        print(f"Params: {params} | Mean CV: {mean_score:.4f} (±{std_score:.4f})")
+        logger.info(f"Params: {params} | Mean CV: {mean_score:.4f} (±{std_score:.4f})")
     
     # Find best parameters
     best_result = max(cv_results, key=lambda x: x['mean_score'])

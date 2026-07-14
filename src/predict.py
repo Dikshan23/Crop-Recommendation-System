@@ -1,116 +1,352 @@
 """
 src/predict.py
 ==============
-Inference module with Platt scaling calibration.
+Inference module for AgroTree.
+
+Pipeline:
+
+Input
+ ↓
+Validation
+ ↓
+Preprocessing
+ ↓
+CART prediction
+ ↓
+Confidence output
 """
 
-import numpy as np
-import joblib
-import os
+import pandas as pd
 
-from src.model_utils import load_model, load_scaler
-from src.validations import validate_inputs, warn_inputs, VALID_RANGES, BOUNDARY_MARGIN
-from src.config import MODEL_PATH
-from src.calibration import apply_platt_scaling, load_platt_params
 
-# Feature column order – must match training
-FEATURE_COLUMNS = ['N', 'P', 'K', 'temperature', 'humidity', 'ph', 'rainfall']
-LOG_COLUMNS     = {'K': 2, 'rainfall': 6}
+from src.model_utils import (
+    load_model,
+    load_medians,
+    load_fences
+)
 
-_model  = None
-_scaler = None
+
+from src.preprocess import (
+    fix_impossible_values,
+    apply_iqr_winsorisation,
+    impute_missing_values,
+    apply_log_transform
+)
+
+
+from src.validations import (
+    validate_inputs,
+    warn_inputs,
+    VALID_RANGES,
+    BOUNDARY_MARGIN
+)
+
+
+
+FEATURE_COLUMNS = [
+
+    "N",
+    "P",
+    "K",
+    "temperature",
+    "humidity",
+    "ph",
+    "rainfall"
+
+]
+
+
+
+_model = None
+_medians = None
+_fences = None
+
+
 
 def _get_model():
+
     global _model
+
     if _model is None:
         _model = load_model()
+
     return _model
 
-def _get_scaler():
-    global _scaler
-    if _scaler is None:
-        _scaler = load_scaler()
-    return _scaler
 
-def _compute_penalty(N, P, K, temperature, humidity, ph, rainfall):
-    """Heuristic penalty (still useful for extreme values)."""
+
+def _get_medians():
+
+    global _medians
+
+    if _medians is None:
+        _medians = load_medians()
+
+    return _medians
+
+
+
+def _get_fences():
+
+    global _fences
+
+    if _fences is None:
+        _fences = load_fences()
+
+    return _fences
+
+
+
+def _compute_penalty(
+        N,
+        P,
+        K,
+        temperature,
+        humidity,
+        ph,
+        rainfall
+):
+
     NEAR_BOUNDARY_PENALTY = 0.05
     UNUSUAL_RANGE_PENALTY = 0.03
     MAX_PENALTY = 0.40
 
+
     values = {
-        "nitrogen":    N,
-        "phosphorus":  P,
-        "potassium":   K,
+
+        "nitrogen": N,
+        "phosphorus": P,
+        "potassium": K,
         "temperature": temperature,
-        "humidity":    humidity,
-        "ph":          ph,
-        "rainfall":    rainfall,
+        "humidity": humidity,
+        "ph": ph,
+        "rainfall": rainfall
+
     }
 
-    total_penalty = 0.0
-    for key, value in values.items():
-        meta    = VALID_RANGES[key]
-        min_val = meta["min"]
-        max_val = meta["max"]
-        margin  = (max_val - min_val) * BOUNDARY_MARGIN
-        if value <= min_val + margin or value >= max_val - margin:
-            total_penalty += NEAR_BOUNDARY_PENALTY
 
-    warnings = warn_inputs(N, P, K, temperature, humidity, ph, rainfall)
-    unusual_count = sum(1 for w in warnings if "unusually low" in w or "unusually high" in w)
-    total_penalty += unusual_count * UNUSUAL_RANGE_PENALTY
+    penalty = 0
 
-    return min(total_penalty, MAX_PENALTY)
 
-def _preprocess_inputs(N, P, K, temperature, humidity, ph, rainfall):
-    features = np.array([[N, P, K, temperature, humidity, ph, rainfall]], dtype=float)
-    for col, idx in LOG_COLUMNS.items():
-        features[0][idx] = np.log1p(features[0][idx])
-    scaler = _get_scaler()
-    features = scaler.transform(features)
-    return features
+    for key,value in values.items():
 
-def predict_crop(N, P, K, temperature, humidity, ph, rainfall, use_calibration=True):
-    """
-    Predict the most suitable crop.
+        meta = VALID_RANGES[key]
 
-    Parameters
-    ----------
-    use_calibration : bool, default True
-        If True, returns Platt‑scaled confidence (recommended).
-        If False, returns raw tree confidence.
 
-    Returns
-    -------
-    crop       : str
-    confidence : float (calibrated or raw, then multiplied by penalty)
-    proba      : dict of class probabilities (raw)
-    """
-    # Hard validation
-    errors = validate_inputs(N, P, K, temperature, humidity, ph, rainfall)
+        margin = (
+            meta["max"] -
+            meta["min"]
+        ) * BOUNDARY_MARGIN
+
+
+        if (
+            value <= meta["min"] + margin
+            or
+            value >= meta["max"] - margin
+        ):
+
+            penalty += NEAR_BOUNDARY_PENALTY
+
+
+
+    warnings = warn_inputs(
+        N,
+        P,
+        K,
+        temperature,
+        humidity,
+        ph,
+        rainfall
+    )
+
+
+    unusual = sum(
+        1
+        for w in warnings
+        if (
+            "unusually low" in w
+            or
+            "unusually high" in w
+        )
+    )
+
+
+    penalty += (
+        unusual *
+        UNUSUAL_RANGE_PENALTY
+    )
+
+
+    return min(
+        penalty,
+        MAX_PENALTY
+    )
+
+
+
+def _preprocess_inputs(
+        N,
+        P,
+        K,
+        temperature,
+        humidity,
+        ph,
+        rainfall
+):
+
+
+    df = pd.DataFrame(
+        [
+            {
+
+                "N":N,
+                "P":P,
+                "K":K,
+                "temperature":temperature,
+                "humidity":humidity,
+                "ph":ph,
+                "rainfall":rainfall
+
+            }
+        ]
+    )
+
+
+    df = fix_impossible_values(
+        df
+    )
+
+
+    df = apply_iqr_winsorisation(
+        df,
+        _get_fences()
+    )
+
+
+    df,_ = impute_missing_values(
+        df,
+        medians=_get_medians()
+    )
+
+
+    df = apply_log_transform(
+        df
+    )
+
+
+    return df[
+        FEATURE_COLUMNS
+    ].values
+
+
+
+def predict_crop(
+        N,
+        P,
+        K,
+        temperature,
+        humidity,
+        ph,
+        rainfall
+):
+
+
+    # -------------------------
+    # Validation
+    # -------------------------
+
+    errors = validate_inputs(
+        N,
+        P,
+        K,
+        temperature,
+        humidity,
+        ph,
+        rainfall
+    )
+
+
     if errors:
-        raise ValueError("Invalid input values:\n" + "\n".join(f"• {e}" for e in errors))
 
-    # Preprocess
-    features = _preprocess_inputs(N, P, K, temperature, humidity, ph, rainfall)
+        raise ValueError(
+            "Invalid input values:\n"
+            +
+            "\n".join(
+                f"• {e}"
+                for e in errors
+            )
+        )
 
-    # Predict
+
+
+    # -------------------------
+    # Preprocessing
+    # -------------------------
+
+    features = _preprocess_inputs(
+        N,
+        P,
+        K,
+        temperature,
+        humidity,
+        ph,
+        rainfall
+    )
+
+
+
+    # -------------------------
+    # Prediction
+    # -------------------------
+
     model = _get_model()
-    crop = model.predict(features)[0]
-    proba = model.predict_proba(features)[0]   # list of dicts
 
-    # Raw confidence of predicted class
-    raw_confidence = proba.get(str(crop), proba.get(crop, 0.0))
 
-    # Apply Platt scaling if requested
-    if use_calibration:
-        confidence = apply_platt_scaling(raw_confidence)
-    else:
-        confidence = raw_confidence
+    crop = model.predict(
+        features
+    )[0]
 
-    # Heuristic penalty (still applied to avoid overconfidence on extreme inputs)
-    penalty = _compute_penalty(N, P, K, temperature, humidity, ph, rainfall)
-    confidence = confidence * (1 - penalty)
 
-    return crop, confidence, proba
+    probabilities = model.predict_proba(
+        features
+    )[0]
+
+
+
+    confidence = probabilities.get(
+        crop,
+        0.0
+    )
+
+
+
+    # confidence reduction for extreme inputs
+
+    penalty = _compute_penalty(
+        N,
+        P,
+        K,
+        temperature,
+        humidity,
+        ph,
+        rainfall
+    )
+
+
+    confidence *= (
+        1 - penalty
+    )
+
+
+
+    return (
+
+        str(crop),
+
+        float(confidence),
+
+        {
+            str(k): float(v)
+            for k,v in probabilities.items()
+        }
+
+    )
