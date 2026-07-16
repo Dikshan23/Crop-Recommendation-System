@@ -6,7 +6,7 @@ import pandas as pd
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from utils.auth import require_auth, logout_user, init_session, get_user_email
+from utils.auth import require_auth, confirm_logout_dialog, init_session, get_user_email, get_user_fullname
 from src.predict import predict_crop          # only predict_crop, no adjusted_confidence
 from src.validations import warn_inputs
 from src.history_predict import (
@@ -18,24 +18,46 @@ from src.history_predict import (
 
 st.set_page_config(page_title="Dashboard", layout="wide")
 
+
+st.markdown("""
+<style>
+.st-key-logout_btn_wrapper button {
+    background: green;
+    color: white;
+    border: 1px solid #ced4da;
+}
+.st-key-logout_btn_wrapper button:hover {
+    background: darkgreen;
+    border-color: #adb5bd;
+    color: #f1f1f1;
+}
+</style>
+""", unsafe_allow_html=True)
+
 # --- Initialize session ---
 init_session()
 
 # --- Protect page ---
 require_auth()
 
-# --- Sidebar ---
-with st.sidebar:
-    st.subheader("User Profile")
-    user_email = get_user_email(st.session_state.get("user"))
-    if user_email:
-        st.write(f"👤 {user_email}")
-    else:
-        st.write("👤 Logged in")
+# --- Get user info ---
+user = st.session_state.get("user")
+user_fullname = get_user_fullname(user)
+user_email = get_user_email(user)
 
-    if st.button("Logout", use_container_width=True):
-        logout_user()
-        st.rerun()
+# --- Top header with welcome message and logout button ---
+col1, col2, col3 = st.columns([2, 1, 1])
+
+with col1:
+    st.title(f"Welcome, {user_fullname}!")
+
+with col3:
+    with st.container(key="logout_btn_wrapper"):
+        if st.button("Logout", width = "stretch", key="cancel_logout_btn"):
+            confirm_logout_dialog()
+        
+
+st.divider()
 
 # --- Page content ---
 st.title("Crop Recommendation Dashboard")
@@ -58,17 +80,17 @@ with tab1:
             st.markdown("##### 🌱 Soil Nutrients")
             n = st.number_input(
                 "Nitrogen (N)  •  1 – 155 mg/kg",
-                value=50.0,
+                value=78.53,
                 help="Valid range: 1 to 155 mg/kg"
             )
             p = st.number_input(
                 "Phosphorus (P)  •  10 – 145 mg/kg",
-                value=50.0,
+                value=48.42,
                 help="Valid range: 10 to 145 mg/kg"
             )
             k = st.number_input(
                 "Potassium (K)  •  10 – 240 mg/kg",
-                value=50.0,
+                value=19.64,
                 help="Valid range: 10 to 240 mg/kg"
             )
 
@@ -76,12 +98,12 @@ with tab1:
             st.markdown("##### 🌤️ Climate Conditions")
             temp = st.number_input(
                 "Temperature  •  8 – 45 °C",
-                value=25.0,
+                value=22.39,
                 help="Valid range: 8 to 45 °C"
             )
             hum = st.number_input(
                 "Humidity  •  14 – 100 %",
-                value=60.0,
+                value=65.38,
                 help="Valid range: 14 to 100 %"
             )
 
@@ -89,19 +111,19 @@ with tab1:
             st.markdown("##### 🧪 Soil Chemistry & Water")
             ph = st.number_input(
                 "Soil pH  •  3.5 – 9.5",
-                value=6.5,
+                value=6.23,
                 help="Valid range: 3.5 to 9.5"
             )
             rain = st.number_input(
                 "Rainfall  •  20 – 850 mm",
-                value=100.0,
+                value=85.99,
                 help="Valid range: 20 to 850 mm"
             )
 
         st.markdown("")
         submit = st.form_submit_button(
             "Get Recommendation",
-            use_container_width=True,
+            width="stretch",
             type="primary"
         )
 
@@ -183,7 +205,7 @@ with tab2:
 
         if filtered:
             for record in filtered:
-                date_obj  = pd.to_datetime(record["created_at"])
+                date_obj = pd.to_datetime(record["created_at"]).tz_convert("Asia/Kathmandu")
                 date_str  = date_obj.strftime("%b %d, %Y")
                 time_str  = date_obj.strftime("%H:%M")
                 crop_name = record["predicted_crop"].title()
@@ -213,7 +235,7 @@ with tab2:
                     st.markdown("---")
                     del_col, _ = st.columns([1, 4])
                     with del_col:
-                        if st.button("🗑️ Delete", key=f"delete_{record['id']}", use_container_width=True):
+                        if st.button("🗑️ Delete", key=f"delete_{record['id']}", width="stretch"):
                             if delete_prediction(record['id']):
                                 st.success("Deleted!")
                                 time.sleep(1)

@@ -28,7 +28,7 @@ st.page_link("app.py", label="Back to Home", icon=":material/arrow_back:")
 st.write("")
 st.write("")
 
-# Center the login form
+# login form
 _, col_center, _ = st.columns([1, 1.5, 1])
 
 with col_center:
@@ -40,7 +40,7 @@ with col_center:
         password = st.text_input("Password", type="password", placeholder="Enter your password")
         
         st.write("")
-        submit = st.form_submit_button("Log In", type="primary", use_container_width=True)
+        submit = st.form_submit_button("Log In", type="primary", width = "stretch")
         
         if submit:
             if not email or not password:
@@ -54,5 +54,5 @@ with col_center:
     st.write("")
     st.markdown("<p style='text-align: center; color: gray;'>Don't have an account?</p>", unsafe_allow_html=True)
     
-    if st.button("Sign Up Instead", icon=":material/person_add:", use_container_width=True):
+    if st.button("Sign Up", icon=":material/person_add:", width = "stretch"):
         st.switch_page("pages/signup.py")
