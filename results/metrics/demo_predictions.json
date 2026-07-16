@@ -1,0 +1,383 @@
+{
+  "summary": {
+    "total_crops": 22,
+    "correct_predictions": 22,
+    "errors": 0,
+    "accuracy": 1.0
+  },
+  "results": {
+    "apple": {
+      "input": {
+        "nitrogen": 21.42,
+        "phosphorus": 134.5,
+        "potassium": 199.82,
+        "temperature": 22.77,
+        "humidity": 92.36,
+        "ph": 5.94,
+        "rainfall": 115.07
+      },
+      "predicted_crop": "apple",
+      "confidence": 0.95,
+      "match_expected": true,
+      "warnings": [
+        "Phosphorus (P): 134.5 mg/kg is near the upper boundary (145.0 mg/kg). Prediction confidence may be reduced."
+      ]
+    },
+    "banana": {
+      "input": {
+        "nitrogen": 100.17,
+        "phosphorus": 82.05,
+        "potassium": 49.92,
+        "temperature": 27.41,
+        "humidity": 80.52,
+        "ph": 5.98,
+        "rainfall": 106.08
+      },
+      "predicted_crop": "banana",
+      "confidence": 1.0,
+      "match_expected": true,
+      "warnings": []
+    },
+    "blackgram": {
+      "input": {
+        "nitrogen": 39.3,
+        "phosphorus": 67.54,
+        "potassium": 19.36,
+        "temperature": 30.14,
+        "humidity": 64.95,
+        "ph": 7.16,
+        "rainfall": 69.44
+      },
+      "predicted_crop": "blackgram",
+      "confidence": 0.8905,
+      "match_expected": true,
+      "warnings": [
+        "Potassium (K): 19.36 mg/kg is near the lower boundary (10.0 mg/kg). Prediction confidence may be reduced.",
+        "Rainfall: 69.44 mm is near the lower boundary (20.0 mm). Prediction confidence may be reduced."
+      ]
+    },
+    "chickpea": {
+      "input": {
+        "nitrogen": 40.08,
+        "phosphorus": 67.5,
+        "potassium": 80.02,
+        "temperature": 18.97,
+        "humidity": 16.85,
+        "ph": 7.32,
+        "rainfall": 81.66
+      },
+      "predicted_crop": "chickpea",
+      "confidence": 0.9,
+      "match_expected": true,
+      "warnings": [
+        "Humidity: 16.85 % is near the lower boundary (14.0 %). Prediction confidence may be reduced.",
+        "Rainfall: 81.66 mm is near the lower boundary (20.0 mm). Prediction confidence may be reduced."
+      ]
+    },
+    "coconut": {
+      "input": {
+        "nitrogen": 21.46,
+        "phosphorus": 16.75,
+        "potassium": 30.54,
+        "temperature": 27.41,
+        "humidity": 94.98,
+        "ph": 5.97,
+        "rainfall": 181.12
+      },
+      "predicted_crop": "coconut",
+      "confidence": 0.9,
+      "match_expected": true,
+      "warnings": [
+        "Phosphorus (P): 16.75 mg/kg is near the lower boundary (10.0 mg/kg). Prediction confidence may be reduced.",
+        "Humidity: 94.98 % is near the upper boundary (100.0 %). Prediction confidence may be reduced."
+      ]
+    },
+    "coffee": {
+      "input": {
+        "nitrogen": 101.1,
+        "phosphorus": 28.58,
+        "potassium": 29.8,
+        "temperature": 25.69,
+        "humidity": 58.3,
+        "ph": 6.75,
+        "rainfall": 163.3
+      },
+      "predicted_crop": "coffee",
+      "confidence": 1.0,
+      "match_expected": true,
+      "warnings": []
+    },
+    "cotton": {
+      "input": {
+        "nitrogen": 116.99,
+        "phosphorus": 46.69,
+        "potassium": 19.49,
+        "temperature": 24.05,
+        "humidity": 79.67,
+        "ph": 6.89,
+        "rainfall": 81.89
+      },
+      "predicted_crop": "cotton",
+      "confidence": 0.9,
+      "match_expected": true,
+      "warnings": [
+        "Potassium (K): 19.49 mg/kg is near the lower boundary (10.0 mg/kg). Prediction confidence may be reduced.",
+        "Rainfall: 81.89 mm is near the lower boundary (20.0 mm). Prediction confidence may be reduced."
+      ]
+    },
+    "grapes": {
+      "input": {
+        "nitrogen": 23.0,
+        "phosphorus": 132.64,
+        "potassium": 200.15,
+        "temperature": 24.08,
+        "humidity": 81.84,
+        "ph": 6.02,
+        "rainfall": 71.34
+      },
+      "predicted_crop": "grapes",
+      "confidence": 0.95,
+      "match_expected": true,
+      "warnings": [
+        "Rainfall: 71.34 mm is near the lower boundary (20.0 mm). Prediction confidence may be reduced."
+      ]
+    },
+    "jute": {
+      "input": {
+        "nitrogen": 77.63,
+        "phosphorus": 46.72,
+        "potassium": 40.2,
+        "temperature": 25.0,
+        "humidity": 79.7,
+        "ph": 6.75,
+        "rainfall": 178.68
+      },
+      "predicted_crop": "jute",
+      "confidence": 0.8428,
+      "match_expected": true,
+      "warnings": []
+    },
+    "kidneybeans": {
+      "input": {
+        "nitrogen": 20.93,
+        "phosphorus": 67.76,
+        "potassium": 19.91,
+        "temperature": 20.29,
+        "humidity": 21.53,
+        "ph": 5.75,
+        "rainfall": 109.58
+      },
+      "predicted_crop": "kidneybeans",
+      "confidence": 0.95,
+      "match_expected": true,
+      "warnings": [
+        "Potassium (K): 19.91 mg/kg is near the lower boundary (10.0 mg/kg). Prediction confidence may be reduced."
+      ]
+    },
+    "lentil": {
+      "input": {
+        "nitrogen": 19.38,
+        "phosphorus": 68.75,
+        "potassium": 19.47,
+        "temperature": 24.56,
+        "humidity": 64.53,
+        "ph": 6.85,
+        "rainfall": 46.98
+      },
+      "predicted_crop": "lentil",
+      "confidence": 0.9,
+      "match_expected": true,
+      "warnings": [
+        "Potassium (K): 19.47 mg/kg is near the lower boundary (10.0 mg/kg). Prediction confidence may be reduced.",
+        "Rainfall: 46.98 mm is near the lower boundary (20.0 mm). Prediction confidence may be reduced."
+      ]
+    },
+    "maize": {
+      "input": {
+        "nitrogen": 78.53,
+        "phosphorus": 48.42,
+        "potassium": 19.64,
+        "temperature": 22.39,
+        "humidity": 65.38,
+        "ph": 6.23,
+        "rainfall": 85.99
+      },
+      "predicted_crop": "maize",
+      "confidence": 0.9,
+      "match_expected": true,
+      "warnings": [
+        "Potassium (K): 19.64 mg/kg is near the lower boundary (10.0 mg/kg). Prediction confidence may be reduced.",
+        "Rainfall: 85.99 mm is near the lower boundary (20.0 mm). Prediction confidence may be reduced."
+      ]
+    },
+    "mango": {
+      "input": {
+        "nitrogen": 20.27,
+        "phosphorus": 26.98,
+        "potassium": 30.08,
+        "temperature": 31.37,
+        "humidity": 50.4,
+        "ph": 5.77,
+        "rainfall": 97.1
+      },
+      "predicted_crop": "mango",
+      "confidence": 1.0,
+      "match_expected": true,
+      "warnings": []
+    },
+    "mothbeans": {
+      "input": {
+        "nitrogen": 21.31,
+        "phosphorus": 47.68,
+        "potassium": 20.37,
+        "temperature": 28.19,
+        "humidity": 53.41,
+        "ph": 6.8,
+        "rainfall": 51.51
+      },
+      "predicted_crop": "mothbeans",
+      "confidence": 0.9,
+      "match_expected": true,
+      "warnings": [
+        "Potassium (K): 20.37 mg/kg is near the lower boundary (10.0 mg/kg). Prediction confidence may be reduced.",
+        "Rainfall: 51.51 mm is near the lower boundary (20.0 mm). Prediction confidence may be reduced."
+      ]
+    },
+    "mungbean": {
+      "input": {
+        "nitrogen": 20.5,
+        "phosphorus": 47.6,
+        "potassium": 19.82,
+        "temperature": 28.57,
+        "humidity": 85.39,
+        "ph": 6.73,
+        "rainfall": 49.49
+      },
+      "predicted_crop": "mungbean",
+      "confidence": 0.9,
+      "match_expected": true,
+      "warnings": [
+        "Potassium (K): 19.82 mg/kg is near the lower boundary (10.0 mg/kg). Prediction confidence may be reduced.",
+        "Rainfall: 49.49 mm is near the lower boundary (20.0 mm). Prediction confidence may be reduced."
+      ]
+    },
+    "muskmelon": {
+      "input": {
+        "nitrogen": 100.03,
+        "phosphorus": 17.86,
+        "potassium": 50.02,
+        "temperature": 28.87,
+        "humidity": 92.24,
+        "ph": 6.36,
+        "rainfall": 25.41
+      },
+      "predicted_crop": "muskmelon",
+      "confidence": 0.9,
+      "match_expected": true,
+      "warnings": [
+        "Phosphorus (P): 17.86 mg/kg is near the lower boundary (10.0 mg/kg). Prediction confidence may be reduced.",
+        "Rainfall: 25.41 mm is near the lower boundary (20.0 mm). Prediction confidence may be reduced."
+      ]
+    },
+    "orange": {
+      "input": {
+        "nitrogen": 19.43,
+        "phosphorus": 16.45,
+        "potassium": 10.0,
+        "temperature": 22.89,
+        "humidity": 92.3,
+        "ph": 7.0,
+        "rainfall": 113.46
+      },
+      "predicted_crop": "orange",
+      "confidence": 0.9,
+      "match_expected": true,
+      "warnings": [
+        "Phosphorus (P): 16.45 mg/kg is near the lower boundary (10.0 mg/kg). Prediction confidence may be reduced.",
+        "Potassium (K): 10.0 mg/kg is near the lower boundary (10.0 mg/kg). Prediction confidence may be reduced."
+      ]
+    },
+    "papaya": {
+      "input": {
+        "nitrogen": 50.01,
+        "phosphorus": 58.48,
+        "potassium": 50.12,
+        "temperature": 33.14,
+        "humidity": 92.67,
+        "ph": 6.73,
+        "rainfall": 141.56
+      },
+      "predicted_crop": "papaya",
+      "confidence": 1.0,
+      "match_expected": true,
+      "warnings": []
+    },
+    "pigeonpeas": {
+      "input": {
+        "nitrogen": 20.44,
+        "phosphorus": 68.09,
+        "potassium": 20.28,
+        "temperature": 27.83,
+        "humidity": 47.31,
+        "ph": 5.75,
+        "rainfall": 152.69
+      },
+      "predicted_crop": "pigeonpeas",
+      "confidence": 0.95,
+      "match_expected": true,
+      "warnings": [
+        "Potassium (K): 20.28 mg/kg is near the lower boundary (10.0 mg/kg). Prediction confidence may be reduced."
+      ]
+    },
+    "pomegranate": {
+      "input": {
+        "nitrogen": 18.83,
+        "phosphorus": 18.67,
+        "potassium": 40.4,
+        "temperature": 22.02,
+        "humidity": 90.23,
+        "ph": 6.45,
+        "rainfall": 110.62
+      },
+      "predicted_crop": "pomegranate",
+      "confidence": 0.95,
+      "match_expected": true,
+      "warnings": [
+        "Phosphorus (P): 18.67 mg/kg is near the lower boundary (10.0 mg/kg). Prediction confidence may be reduced."
+      ]
+    },
+    "rice": {
+      "input": {
+        "nitrogen": 80.61,
+        "phosphorus": 47.77,
+        "potassium": 39.69,
+        "temperature": 23.72,
+        "humidity": 82.27,
+        "ph": 6.42,
+        "rainfall": 239.16
+      },
+      "predicted_crop": "rice",
+      "confidence": 1.0,
+      "match_expected": true,
+      "warnings": []
+    },
+    "watermelon": {
+      "input": {
+        "nitrogen": 99.58,
+        "phosphorus": 17.07,
+        "potassium": 50.16,
+        "temperature": 25.7,
+        "humidity": 85.18,
+        "ph": 6.49,
+        "rainfall": 52.53
+      },
+      "predicted_crop": "watermelon",
+      "confidence": 0.9,
+      "match_expected": true,
+      "warnings": [
+        "Phosphorus (P): 17.07 mg/kg is near the lower boundary (10.0 mg/kg). Prediction confidence may be reduced.",
+        "Rainfall: 52.53 mm is near the lower boundary (20.0 mm). Prediction confidence may be reduced."
+      ]
+    }
+  }
+}
