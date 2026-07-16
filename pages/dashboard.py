@@ -65,7 +65,7 @@ st.title("Crop Recommendation Dashboard")
 user = st.session_state.get("user")
 prediction_count = get_prediction_count(user)
 
-tab1, tab2 = st.tabs(["Make Prediction", f"History ({prediction_count})"])
+tab1, tab2 = st.tabs(["Make Prediction", f"History"])
 
 # -----------------------------------------------------------
 # TAB 1: PREDICTION FORM
@@ -164,7 +164,7 @@ with tab1:
                 st.error(line.replace("• ", ""))
 
 # -----------------------------------------------------------
-# TAB 2: PREDICTION HISTORY (unchanged)
+# TAB 2: PREDICTION HISTORY 
 # -----------------------------------------------------------
 with tab2:
     history = get_user_prediction_history(user)
