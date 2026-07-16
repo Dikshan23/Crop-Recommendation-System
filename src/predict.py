@@ -301,22 +301,21 @@ def predict_crop(
     model = _get_model()
 
 
-    crop = model.predict(
-        features
-    )[0]
-
-
     probabilities = model.predict_proba(
         features
     )[0]
 
 
-
-    confidence = probabilities.get(
-        crop,
-        0.0
+    best_crop, best_probability = max(
+        (
+            (str(label), float(probability))
+            for label, probability in probabilities.items()
+        ),
+        key=lambda item: item[1]
     )
 
+
+    confidence = best_probability
 
 
     # confidence reduction for extreme inputs
@@ -340,13 +339,12 @@ def predict_crop(
 
     return (
 
-        str(crop),
+        str(best_crop),
 
         float(confidence),
 
         {
-            str(k): float(v)
-            for k,v in probabilities.items()
+            str(best_crop): float(best_probability)
         }
 
     )

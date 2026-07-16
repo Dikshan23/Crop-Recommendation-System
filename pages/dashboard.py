@@ -125,27 +125,8 @@ with tab1:
 
             st.success("✅ Prediction Complete")
 
-            # Sort proba for top-2 check (using raw probabilities, not calibrated confidence)
-            top = sorted(proba.items(), key=lambda x: x[1], reverse=True)[:2]
-
-            # Show double prediction when the runner-up is genuinely competitive:
-            #   - runner-up raw probability > 30% (not just noise)
-            #   - gap between 1st and 2nd < 35% (not a dominant single prediction)
-            second_exists = (
-                len(top) > 1
-                and top[1][1] > 0.30
-                and (top[0][1] - top[1][1]) < 0.35
-            )
-
-            if second_exists:
-                # Genuinely ambiguous — surface both crops
-                st.info(f"🌾 Primary recommendation: **{top[0][0].upper()}** ({confidence*100:.0f}% confidence)")
-                st.warning(f"Also consider: **{top[1][0].upper()}** ({top[1][1]*100:.0f}% probability) — conditions overlap or input values are unusual")
-
-            else:
-                # Single prediction – display final calibrated confidence
-                st.info(f"🌾 The most suitable crop for these conditions is: **{crop.upper()}**")
-                st.caption(f"Confidence: {confidence * 100:.1f}%")
+            st.info(f"🌾 Recommended crop: **{crop.upper()}**")
+            st.caption(f"Confidence: {confidence * 100:.1f}%")
 
             # Save to history
             if save_prediction_to_history(user, n, p, k, temp, hum, ph, rain, crop):
