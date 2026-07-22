@@ -71,11 +71,11 @@ _, col_center, _ = st.columns([1, 1.5, 1])
 
 with col_center:
     st.markdown("<h2 style='text-align: center; color: #4CAF50;'>Create an Account</h2>", unsafe_allow_html=True)
-    st.markdown("<p style='text-align: center; color: gray; margin-bottom: 30px;'>Join AgriAI to start optimizing your crop yield today.</p>", unsafe_allow_html=True)
+    st.markdown("<p style='text-align: center; color: gray; margin-bottom: 30px;'>Join AgroTree to start optimizing your crop yield today.</p>", unsafe_allow_html=True)
     
     with st.form("signup_form"):
         fullname = st.text_input("Full Name", placeholder = "Full Name")
-        email = st.text_input("Email Address", placeholder="e.g., farmer@agriai.com")
+        email = st.text_input("Email Address", placeholder="e.g., farmer@agro.com")
         password = st.text_input("Password", type="password", placeholder="Create a strong password")
         confirm_password = st.text_input("Confirm Password", type="password", placeholder="Repeat password")
         

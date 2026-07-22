@@ -1,13 +1,16 @@
 import streamlit as st
-from utils.auth import login_user, init_session
+from utils.auth import login_user, init_session, is_admin
 
 st.set_page_config(page_title="Log In - AgroTree", layout="wide", initial_sidebar_state="collapsed")
 
 init_session()
 
-# If already logged in, redirect to dashboard
+# If already logged in, redirect to the correct landing page
 if st.session_state.get("user"):
-    st.switch_page("pages/dashboard.py")
+    if is_admin():
+        st.switch_page("pages/admin_home.py")
+    else:
+        st.switch_page("pages/dashboard.py")
 
 st.markdown("""
 <style>
@@ -47,7 +50,10 @@ with col_center:
                 st.error("Please enter both email and password")
             elif login_user(email, password):
                 st.success("Login successful! Redirecting...")
-                st.switch_page("pages/dashboard.py")
+                if is_admin():
+                    st.switch_page("pages/admin_home.py")
+                else:
+                    st.switch_page("pages/dashboard.py")
             else:
                 st.error("Invalid email or password")
     
