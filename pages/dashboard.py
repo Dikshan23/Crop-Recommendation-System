@@ -189,7 +189,7 @@ with tab1:
                 st.error(line.replace("• ", ""))
 
 # -----------------------------------------------------------
-# TAB 2: PREDICTION HISTORY (unchanged)
+# TAB 2: PREDICTION HISTORY 
 # -----------------------------------------------------------
 with tab2:
     history = get_user_prediction_history(user)
