@@ -15,13 +15,13 @@ Per-crop mean ranges (from dataset):
 
 # ── Valid hard ranges ─────────────────────────────────────────────────────────
 VALID_RANGES = {
-    "nitrogen":    {"min":  1.0,  "max": 155.0, "unit": "mg/kg", "label": "Nitrogen (N)"},
-    "phosphorus":  {"min": 10.0,  "max": 145.0, "unit": "mg/kg", "label": "Phosphorus (P)"},
-    "potassium":   {"min": 10.0,  "max": 240.0, "unit": "mg/kg", "label": "Potassium (K)"},
-    "temperature": {"min":  8.0,  "max":  45.0, "unit": "°C",    "label": "Temperature"},
-    "humidity":    {"min": 14.0,  "max": 100.0, "unit": "%",     "label": "Humidity"},
-    "ph":          {"min":  3.5,  "max":   9.5, "unit": "",      "label": "Soil pH"},
-    "rainfall":    {"min": 20.0,  "max": 850.0, "unit": "mm",    "label": "Rainfall"},
+    "nitrogen":    {"min":  0.0,  "max": 155.0, "unit": "mg/kg", "label": "Nitrogen (N)"},
+    "phosphorus":  {"min": 4.0,  "max": 170, "unit": "mg/kg", "label": "Phosphorus (P)"},
+    "potassium":   {"min": 4,  "max": 235, "unit": "mg/kg", "label": "Potassium (K)"},
+    "temperature": {"min":  8,  "max":  52, "unit": "°C",    "label": "Temperature"},
+    "humidity":    {"min": 13,  "max": 100.0, "unit": "%",     "label": "Humidity"},
+    "ph":          {"min":  2.9,  "max":   11, "unit": "",      "label": "Soil pH"},
+    "rainfall":    {"min": 17,  "max": 845.0, "unit": "mm",    "label": "Rainfall"},
 }
 
 # 8% boundary margin

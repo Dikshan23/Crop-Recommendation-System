@@ -6,7 +6,7 @@ import pandas as pd
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from utils.auth import require_auth, confirm_logout_dialog, init_session, get_user_email, get_user_fullname
+from utils.auth import require_auth, confirm_logout_dialog, init_session, get_user_email, get_user_fullname, is_admin
 from src.predict import predict_crop          # only predict_crop, no adjusted_confidence
 from src.validations import warn_inputs
 from src.history_predict import (
@@ -40,6 +40,9 @@ init_session()
 # --- Protect page ---
 require_auth()
 
+if is_admin():
+    st.switch_page("pages/admin_home.py")
+
 # --- Get user info ---
 user = st.session_state.get("user")
 user_fullname = get_user_fullname(user)
@@ -55,6 +58,10 @@ with col3:
     with st.container(key="logout_btn_wrapper"):
         if st.button("Logout", width = "stretch", key="cancel_logout_btn"):
             confirm_logout_dialog()
+
+if is_admin():
+    st.page_link("pages/admin_home.py", label="Admin Panel", icon=":material/admin_panel_settings:")
+    st.caption("Admin access enabled")
         
 
 st.divider()
@@ -62,7 +69,6 @@ st.divider()
 # --- Page content ---
 st.title("Crop Recommendation Dashboard")
 
-user = st.session_state.get("user")
 prediction_count = get_prediction_count(user)
 
 tab1, tab2 = st.tabs(["Make Prediction", f"History"])
@@ -79,51 +85,51 @@ with tab1:
         with col1:
             st.markdown("##### 🌱 Soil Nutrients")
             n = st.number_input(
-                "Nitrogen (N)  •  1 – 155 mg/kg",
-                value=78.53,
-                help="Valid range: 1 to 155 mg/kg"
+                "Nitrogen (N)  •  0  – 155 mg/kg",
+                value=50.0,
+                help="Valid range: 0 to 155mg/kg"
             )
             p = st.number_input(
-                "Phosphorus (P)  •  10 – 145 mg/kg",
-                value=48.42,
-                help="Valid range: 10 to 145 mg/kg"
+                "Phosphorus (P)  •  4 – 170 mg/kg",
+                value=50.0,
+                help="Valid range: 4 to 170 mg/kg"
             )
             k = st.number_input(
-                "Potassium (K)  •  10 – 240 mg/kg",
-                value=19.64,
-                help="Valid range: 10 to 240 mg/kg"
+                "Potassium (K)  •  4 – 235 mg/kg",
+                value=50.0,
+                help="Valid range: 4 to 235 mg/kg"
             )
 
         with col2:
             st.markdown("##### 🌤️ Climate Conditions")
             temp = st.number_input(
-                "Temperature  •  8 – 45 °C",
-                value=22.39,
-                help="Valid range: 8 to 45 °C"
+                "Temperature  •  8 – 52 °C",
+                value=25.0,
+                help="Valid range: 8 to 52 °C"
             )
             hum = st.number_input(
-                "Humidity  •  14 – 100 %",
-                value=65.38,
-                help="Valid range: 14 to 100 %"
+                "Humidity  •  13 – 100 %",
+                value=60.0,
+                help="Valid range: 13 to 100 %"
             )
 
         with col3:
             st.markdown("##### 🧪 Soil Chemistry & Water")
             ph = st.number_input(
-                "Soil pH  •  3.5 – 9.5",
-                value=6.23,
-                help="Valid range: 3.5 to 9.5"
+                "Soil pH  •  2.9 – 11",
+                value=6.5,
+                help="Valid range: 2.9 to 11"
             )
             rain = st.number_input(
-                "Rainfall  •  20 – 850 mm",
-                value=85.99,
-                help="Valid range: 20 to 850 mm"
+                "Rainfall  •  17 – 845 mm",
+                value=100.0,
+                help="Valid range: 17 to 845 mm"
             )
 
         st.markdown("")
         submit = st.form_submit_button(
             "Get Recommendation",
-            width="stretch",
+            width = "stretch",
             type="primary"
         )
 
@@ -147,8 +153,27 @@ with tab1:
 
             st.success("✅ Prediction Complete")
 
-            st.info(f"🌾 Recommended crop: **{crop.upper()}**")
-            st.caption(f"Confidence: {confidence * 100:.1f}%")
+            # Sort proba for top-2 check (using raw probabilities, not calibrated confidence)
+            top = sorted(proba.items(), key=lambda x: x[1], reverse=True)[:2]
+
+            # Show double prediction when the runner-up is genuinely competitive:
+            #   - runner-up raw probability > 30% (not just noise)
+            #   - gap between 1st and 2nd < 35% (not a dominant single prediction)
+            second_exists = (
+                len(top) > 1
+                and top[1][1] > 0.30
+                and (top[0][1] - top[1][1]) < 0.35
+            )
+
+            if second_exists:
+                # Genuinely ambiguous — surface both crops
+                st.info(f"🌾 Primary recommendation: **{top[0][0].upper()}** ({confidence*100:.0f}% confidence)")
+                st.warning(f"Also consider: **{top[1][0].upper()}** ({top[1][1]*100:.0f}% probability) — conditions overlap or input values are unusual")
+
+            else:
+                # Single prediction – display final calibrated confidence
+                st.info(f"🌾 The most suitable crop for these conditions is: **{crop.upper()}**")
+                st.caption(f"Confidence: {confidence * 100:.1f}%")
 
             # Save to history
             if save_prediction_to_history(user, n, p, k, temp, hum, ph, rain, crop):
@@ -205,7 +230,7 @@ with tab2:
 
         if filtered:
             for record in filtered:
-                date_obj = pd.to_datetime(record["created_at"]).tz_convert("Asia/Kathmandu")
+                date_obj  = pd.to_datetime(record["created_at"]).tz_convert("Asia/Kathmandu")
                 date_str  = date_obj.strftime("%b %d, %Y")
                 time_str  = date_obj.strftime("%H:%M")
                 crop_name = record["predicted_crop"].title()
@@ -235,7 +260,7 @@ with tab2:
                     st.markdown("---")
                     del_col, _ = st.columns([1, 4])
                     with del_col:
-                        if st.button("🗑️ Delete", key=f"delete_{record['id']}", width="stretch"):
+                        if st.button("🗑️ Delete", key=f"delete_{record['id']}", width = "stretch"):
                             if delete_prediction(record['id']):
                                 st.success("Deleted!")
                                 time.sleep(1)
