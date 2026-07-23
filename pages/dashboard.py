@@ -86,17 +86,17 @@ with tab1:
             st.markdown("##### 🌱 Soil Nutrients")
             n = st.number_input(
                 "Nitrogen (N)  •  0  – 155 mg/kg",
-                value=50,
+                value=50.0,
                 help="Valid range: 0 to 155mg/kg"
             )
             p = st.number_input(
-                "Phosphorus (P)  •  4 – 140 mg/kg",
-                value=50,
-                help="Valid range: 4 to 140 mg/kg"
+                "Phosphorus (P)  •  4 – 170 mg/kg",
+                value=50.0,
+                help="Valid range: 4 to 170 mg/kg"
             )
             k = st.number_input(
                 "Potassium (K)  •  4 – 235 mg/kg",
-                value=50,
+                value=50.0,
                 help="Valid range: 4 to 235 mg/kg"
             )
 
@@ -116,14 +116,14 @@ with tab1:
         with col3:
             st.markdown("##### 🧪 Soil Chemistry & Water")
             ph = st.number_input(
-                "Soil pH  •  3.5 – 10",
+                "Soil pH  •  2.9 – 11",
                 value=6.5,
-                help="Valid range: 3.5 to 10"
+                help="Valid range: 2.9 to 11"
             )
             rain = st.number_input(
-                "Rainfall  •  17 – 850 mm",
+                "Rainfall  •  17 – 845 mm",
                 value=100.0,
-                help="Valid range: 17 to 850 mm"
+                help="Valid range: 17 to 845 mm"
             )
 
         st.markdown("")
@@ -230,7 +230,7 @@ with tab2:
 
         if filtered:
             for record in filtered:
-                date_obj  = pd.to_datetime(record["created_at"])
+                date_obj  = pd.to_datetime(record["created_at"]).tz_convert("Asia/Kathmandu")
                 date_str  = date_obj.strftime("%b %d, %Y")
                 time_str  = date_obj.strftime("%H:%M")
                 crop_name = record["predicted_crop"].title()
