@@ -2,10 +2,7 @@ import streamlit as st
 from utils.supabase_client import supabase, admin_supabase
 from streamlit_cookies_manager import EncryptedCookieManager
 
-# -------------------------------
 # Cookie Manager Setup
-# -------------------------------
-
 try:
     cookies = EncryptedCookieManager(
         prefix="agrotree_",
@@ -71,10 +68,7 @@ def get_user_id(user):
 
     return None
 
-
-# -------------------------------
 # Get user fullname
-# -------------------------------
 def get_user_fullname(user):
     """Get user fullname from session cache or user object."""
 
@@ -95,9 +89,8 @@ def get_user_fullname(user):
     return "User"
 
 
-# -------------------------------
 # Cache user fullname from database
-# -------------------------------
+
 def _cache_user_fullname(user):
     """Fetch fullname from profiles table and cache in session."""
     if not user:
@@ -113,9 +106,7 @@ def _cache_user_fullname(user):
         st.session_state["user_fullname"] = user.email.split("@")[0].title() if user.email else "User"
 
 
-# -------------------------------
 # Save tokens to encrypted browser cookies
-# -------------------------------
 def _save_session_cookies(session_data):
     """Persist access/refresh tokens in encrypted browser cookies."""
 
@@ -130,9 +121,7 @@ def _save_session_cookies(session_data):
         print("Cookie save error:", e)
 
 
-# -------------------------------
 # Clear session cookies
-# -------------------------------
 def _clear_session_cookies():
     """Remove cached tokens from browser cookies."""
 
@@ -147,13 +136,10 @@ def _clear_session_cookies():
         print("Cookie clear error:", e)
 
 
-# -------------------------------
-# Initialize session with persistence
-# -------------------------------
+# Initialize session with persistence-
 def init_session():
     """Initialize session state with automatic persistence and recovery via cookies."""
 
-    # Initialize session state variables
     if "user" not in st.session_state:
         st.session_state["user"] = None
 
@@ -210,12 +196,13 @@ def init_session():
 
     except Exception as e:
         print("Session restore error:", e)
+        # import traceback
+        # traceback.print_exc()
         _clear_session_cookies()
 
 
-# -------------------------------
 # Login user
-# -------------------------------
+
 def login_user(email, password):
     """Authenticate user with email and password."""
 
@@ -242,10 +229,7 @@ def login_user(email, password):
         print("Login error:", e)
         return False
 
-
-# -------------------------------
 # Sign up user
-# -------------------------------
 def signup_user(fullname, email, password, role=None):
     """Register new user with email, password, full name, and an optional role."""
 
@@ -281,9 +265,7 @@ def signup_user(fullname, email, password, role=None):
         return False
 
 
-# -------------------------------
 # Logout user
-# -------------------------------
 def logout_user():
     """Clear session and sign out from Supabase."""
 
@@ -400,7 +382,7 @@ def get_user_role(user=None, profile=None):
 
     if email:
         normalized_email = email.lower()
-        if normalized_email == "admin@gmail.com" or normalized_email in _get_admin_emails():
+        if normalized_email in _get_admin_emails():
             return "admin"
 
     user_id = _get_user_identifier(user)
@@ -441,9 +423,7 @@ def is_admin(user=None):
     role = get_user_role(user=user)
     return role == "admin"
 
-# -------------------------------
 # Require authentication
-# -------------------------------
 def require_auth():
     """Redirect to login page if user is not authenticated."""
 

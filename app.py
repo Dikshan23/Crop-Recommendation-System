@@ -3,7 +3,6 @@ import graphviz
 from PIL import Image
 from utils.auth import init_session
 import base64
-
 def encode_image(image_path):
     with open(image_path, "rb") as image_file:
         return base64.b64encode(image_file.read()).decode()
@@ -125,6 +124,10 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
+pdf_path = "assets/finalAgro.pdf"
+
+with open(pdf_path, "rb") as pdf_file:
+    pdf_bytes = pdf_file.read()
 # --- HERO SECTION ---
 st.markdown("<div style='margin-top: 50px;'></div>", unsafe_allow_html=True)
 hero_col1, hero_col2 = st.columns([1.2, 1], gap="large")
@@ -136,14 +139,20 @@ with hero_col1:
     st.write("")
     btn_col1, btn_col2, _ = st.columns([1, 1, 1])
     with btn_col1:
-        if st.button("Get Started", icon=":material/eco:", type="primary", use_container_width=True):
+        if st.button("Get Started", icon=":material/eco:", type="primary", width="stretch"):
             st.switch_page("pages/login.py")
     with btn_col2:
-        st.button("Learn More", icon=":material/menu_book:", use_container_width=True)
+        st.download_button(
+        label="📖 Learn More",
+        data=pdf_bytes,
+        file_name="AgroTree_Documentation.pdf",
+        mime="application/pdf",
+        width="stretch"
+       )
 
 with hero_col2:
     img = Image.open("images/hero.png")
-    st.image(img, use_container_width=True)
+    st.image(img, width="stretch")
 
 # --- FEATURES SECTION ---
 st.markdown("<div class='section-spacing'></div>", unsafe_allow_html=True)
@@ -186,7 +195,7 @@ hw_col1, hw_col2 = st.columns([1.2, 1], gap="large")
 
 with hw_col1:
     st.markdown("<h4 class='flex-center' style='margin-bottom: 20px;'><span class='material-symbols-outlined'>play_circle</span> System Demonstration</h4>", unsafe_allow_html=True)
-    st.video("https://www.youtube.com/watch?v=A2dY2W_q72I")
+    st.video("assets/AgrooTree.mp4")
 
 with hw_col2:
     st.markdown("<h4 class='flex-center' style='margin-bottom: 20px;'><span class='material-symbols-outlined'>account_tree</span> System Flow Architecture</h4>", unsafe_allow_html=True)
@@ -204,7 +213,7 @@ with hw_col2:
     
     flowchart.edges([('A', 'B'), ('B', 'C'), ('C', 'D')])
     
-    st.graphviz_chart(flowchart, use_container_width=True)
+    st.graphviz_chart(flowchart, width="stretch")
 
 # --- DEVELOPERS SECTION ---
 st.markdown("<div class='section-spacing'></div>", unsafe_allow_html=True)
@@ -256,7 +265,7 @@ st.markdown("""
 
 _, cta_col, _ = st.columns([1, 1, 1])
 with cta_col:
-    if st.button("Get Started Now", icon=":material/rocket_launch:", type="primary", use_container_width=True):
+    if st.button("Get Started Now", icon=":material/rocket_launch:", type="primary", width="stretch"):
         st.switch_page("pages/login.py")
 
 # --- FOOTER ---
@@ -266,4 +275,4 @@ with footer_col1:
     st.markdown("<p style='color: gray; font-size: 0.9rem;'>© 2026 AgroTree – Crop Recommendation System<br>Orchid International College</p>", unsafe_allow_html=True)
 with footer_col2:
    st.page_link("pages/privacy.py", label="Privacy Policy")
-   st.page_link("pages/terms.py", label="Terms of Service")
+   st.page_link("pages/terms.py", label="Terms of Service") 
