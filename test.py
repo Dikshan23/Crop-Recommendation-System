@@ -26,3 +26,4 @@ def test_TC05_model_load_failure():
     with patch("src.model_utils.os.path.exists", return_value=False):
         with pytest.raises(FileNotFoundError):
             load_model()
+
