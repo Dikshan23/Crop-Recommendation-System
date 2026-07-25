@@ -176,7 +176,7 @@ with tab1:
                 st.caption(f"Confidence: {confidence * 100:.1f}%")
 
             # Save to history
-            if save_prediction_to_history(user, n, p, k, temp, hum, ph, rain, crop):
+            if save_prediction_to_history(user, n, p, k, temp, hum, ph, rain, crop,confidence = confidence):
                 st.success("✅ Prediction saved to history!")
             else:
                 st.warning("⚠️ Prediction made but could not save to history.")

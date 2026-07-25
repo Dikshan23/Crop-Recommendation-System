@@ -51,7 +51,7 @@ def save_prediction_to_history(user, n, p, k, temp, hum, ph, rain, predicted_cro
             "ph": float(ph),
             "rainfall": float(rain),
             "predicted_crop": str(predicted_crop).lower(),
-            "created_at": datetime.utcnow().isoformat()
+            "created_at": datetime.utcnow().isoformat(),
         }
         
         # Add confidence if provided and valid
