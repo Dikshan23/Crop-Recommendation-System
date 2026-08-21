@@ -305,6 +305,8 @@ def predict_crop(
         features
     )[0]
 
+    print(probabilities)
+
 
     best_crop, best_probability = max(
         (
@@ -344,7 +346,8 @@ def predict_crop(
         float(confidence),
 
         {
-            str(best_crop): float(best_probability)
+            str(label): float(probability)
+            for label, probability in probabilities.items()
         }
 
     )

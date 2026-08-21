@@ -1,0 +1,5 @@
+Model,Accuracy,Weighted Precision,Weighted Recall,Weighted F1
+Decision Tree (sklearn default),0.6535,0.5866,0.6535,0.5868
+Random Forest (100 trees),0.9805,0.9806,0.9805,0.9804
+Naive Bayes,0.9526,0.9531,0.9526,0.9526
+Proposed CART (custom),0.943,0.9437,0.943,0.9427

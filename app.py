@@ -215,6 +215,72 @@ with hw_col2:
     
     st.graphviz_chart(flowchart, width="stretch")
 
+# --- FAQ SECTION ---
+st.markdown("<div class='section-spacing'></div>", unsafe_allow_html=True)
+st.markdown("<h2 style='text-align: center;'>Frequently Asked Questions</h2><br>", unsafe_allow_html=True)
+
+st.markdown("""
+<style>
+    .streamlit-expanderHeader {
+        font-family: 'Poppins', sans-serif !important;
+        font-weight: 600 !important;
+        font-size: 1.05rem !important;
+        background-color: var(--secondary-background-color) !important;
+        border-radius: 12px !important;
+        border: 1px solid var(--faded-text-color) !important;
+    }
+    .streamlit-expanderHeader:hover {
+        border-color: #4CAF50 !important;
+    }
+    .streamlit-expanderContent {
+        background-color: var(--secondary-background-color) !important;
+        border-radius: 0 0 12px 12px !important;
+        border-left: 1px solid var(--faded-text-color) !important;
+        border-right: 1px solid var(--faded-text-color) !important;
+        border-bottom: 1px solid var(--faded-text-color) !important;
+    }
+</style>
+""", unsafe_allow_html=True)
+
+faq_col1, faq_col2, faq_col3 = st.columns([0.5, 5, 0.5])
+with faq_col2:
+    faqs = [
+        (
+            "What data does this system need to recommend a crop?",
+            "This system needs seven inputs: Nitrogen (N), Phosphorus (P), and "
+            "Potassium (K) levels in the soil, soil pH, and average "
+            "temperature, humidity, and rainfall for your location."
+        ),
+        (
+            "How does the recommendation engine work?",
+            "It uses a CART (Classification and Regression Tree) decision "
+            "tree algorithm implemented from scratch. The model learns "
+            "splitting rules from an agricultural dataset and walks your "
+            "input values down the tree to the best-matching crop."
+        ),
+        (
+            "How accurate are the recommendations?",
+            "Accuracy depends on how closely your soil and climate "
+            "measurements match the training dataset."
+        ),
+        (
+            "Do I need to create an account to use Crop Recommendation System?",
+            "Yes. Registering lets us save your input history and "
+            "recommendations so you can track results and compare "
+            "seasons over time."
+        ),
+        (
+            "Is my soil and farm data kept private?",
+            "Yes. Your data is used only to generate your recommendations "
+            "and is not shared with third parties. See our Privacy Policy "
+            "for full details."
+        ),
+    ]
+
+    for question, answer in faqs:
+        with st.expander(question):
+            st.markdown(f"<p style='color: var(--text-color); line-height: 1.6;'>{answer}</p>", unsafe_allow_html=True)
+
 # --- DEVELOPERS SECTION ---
 st.markdown("<div class='section-spacing'></div>", unsafe_allow_html=True)
 st.markdown("<h2 style='text-align: center;'>Meet the Developers</h2><br>", unsafe_allow_html=True)
@@ -272,7 +338,7 @@ with cta_col:
 st.markdown("<div style='margin-top: 50px;'></div><hr>", unsafe_allow_html=True)
 footer_col1, footer_col2 = st.columns([3, 1])
 with footer_col1:
-    st.markdown("<p style='color: gray; font-size: 0.9rem;'>© 2026 AgroTree – Crop Recommendation System<br>Orchid International College</p>", unsafe_allow_html=True)
+    st.markdown("<p style='color: gray; font-size: 0.9rem;'>© 2026 Crop Recommendation System<br>Orchid International College</p>", unsafe_allow_html=True)
 with footer_col2:
    st.page_link("pages/privacy.py", label="Privacy Policy")
    st.page_link("pages/terms.py", label="Terms of Service") 
